@@ -1,0 +1,13 @@
+{
+  "index": {
+    "PLEML": "PLEML.sysml"
+  },
+  "created": "2026-10-17T08:00:00Z",
+  "metamodel": "https://www.omg.org/spec/SysML/20250201",
+  "checksum": {
+    "PLEML.sysml": {
+      "value": "",
+      "algorithm": "NONE"
+    }
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "name": "pleml",
+  "publisher": "mbse4u",
+  "version": "1.0.0",
+  "license": "MIT",
+  "tags": [
+    "sysml-v2",
+    "MBPLE",
+    "methodology",
+    "MBSE"
+  ]
+}

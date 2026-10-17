@@ -1,0 +1,5 @@
+sysand-lock.toml
+.sysand/
+.claude/
+output/
+*.kpar
