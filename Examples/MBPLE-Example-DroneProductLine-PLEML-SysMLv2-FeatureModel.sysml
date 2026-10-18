@@ -30,25 +30,25 @@ package <FM> DroneProductLineFeatureModelProject {
             #feature occurrence deliveryMission[0..1] :> missionKind default null;
             #feature occurrence observationMission[0..1] :> missionKind default null {
                 assert constraint :>> xorFeatures {
-                    in #feature occurrence :>> excluded = (hasPayload);
+                    in occurrence constrainedFeatures = new FeatureOperand(that, hasPayload);
                 }
             }
             #feature occurrence securityMission[0..1] :> observationMission default null;
             #feature occurrence forestFireMission[0..1] :> observationMission default null {
                 assert constraint :>> requiresFeatures {
-                    in #feature occurrence :>> requiredFeatures = (longMission);
+                    in occurrence constrainedFeatures = new FeatureOperand(that, longMission);
                 }
             }
             #feature occurrence funMission[0..1] :> missionKind default null;
 
             #feature occurrence missionTime default standardMission;
-            #feature occurrence standardMission[0..1] :> missionTime default featureSet;
+            #feature occurrence standardMission[0..1] :> missionTime default new standardMission(); 
             #feature occurrence longMission[0..1] :> missionTime default null;
 
             // Optional feature
             #feature occurrence hasPayload[0..1] default null {
                 assert constraint :>> requiresFeatures {
-                    in #feature occurrence :>> requiredFeatures = (payloadSize);
+                    in occurrence constrainedFeatures = new FeatureOperand(that, payloadSize);
                 }
             }
             #feature occurrence payloadSize[0..1] default null;

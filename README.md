@@ -16,7 +16,7 @@ PLEML provides the semantic metadata and structural constructs to represent vari
 - **FeatureTree** — Hierarchy of features that specifies the variability. Nesting builds the hierarchy, multiplicities model optional and mandatory features, specialization models alternatives
 - **Feature** — Characteristic of a product with `name`, `bindingTime`, `externalRepresentation` (for proxy features), and the derived `isAuthoritative`
 - **FeatureConfiguration** — Selection of features that describes a member product, verified by built-in constraints (only features, all non-root features set, consistent binding time, all feature constraints satisfied)
-- **Feature constraints** — `RequiresConstraint` (`requiresFeatures`) and `XORConstraint` (`xorFeatures`, aka conflict constraint), both evaluated against a feature configuration
+- **Feature constraints** — `RequiresConstraint` (`requiresFeatures`: A implies B), `XORConstraint` (`xorFeatures`, aka conflict constraint: A excludes B), and `ImpliesConstraint` (`impliesFeatures`: (A and B) implies C, generalizes Requires with several premises and conclusions), all evaluated against a feature configuration. All constraints have the same parameters: the constrained features as a `FeatureOperand` with the operands A and B, created with `new FeatureOperand(A, B)`, and the feature configuration
 - **LifeCycleKind** — Binding times `Development`, `Production`, and `Operation`
 - **PLEML keywords** — `#featureModel`, `#featureTree`, `#feature`, and `#featureConfiguration` for clean model notation
 - **Feature bindings** — Metadata `@FB` (`FeatureBinding`) binds elements of shared assets to features, `@FCFGB` (`FeatureConfigurationBinding`) binds a product model to a feature configuration. `DeriveFeatureName` derives the feature name from a dependency
@@ -35,8 +35,9 @@ package MyProductLine {
         #featureTree occurrence myFeatureTree :> featureTrees {
             #feature occurrence optionalFeature[0..1] default null;
             #feature occurrence otherFeature[0..1] default null {
+                // otherFeature (that) requires optionalFeature
                 assert constraint :>> requiresFeatures {
-                    in #feature occurrence :>> requiredFeatures = (optionalFeature);
+                    in occurrence constrainedFeatures = new FeatureOperand(that, optionalFeature);
                 }
             }
         }
@@ -62,7 +63,7 @@ Examples/                                                      # Drone Product L
 
 ## Tests
 
-[Test/PLEML-Test-Constraints.sysml](Test/PLEML-Test-Constraints.sysml) contains valid and violating feature configurations for the `XORConstraint` and `RequiresConstraint`, with the expected verdict documented. Evaluating the constraints requires a tool that supports `suboccurrences` and the binding of the `featureConfiguration`; OpenSysML v0.9.2 loads the models but does not evaluate the constraints conclusively.
+[Test/PLEML-Test-Constraints.sysml](Test/PLEML-Test-Constraints.sysml) contains valid and violating feature configurations for the `XORConstraint`, `RequiresConstraint` and `ImpliesConstraint`, with the expected verdict documented. Evaluating the constraints requires a tool that supports `suboccurrences` and the binding of the `featureConfiguration`; OpenSysML v0.9.2 loads the models but does not evaluate the constraints conclusively.
 
 ## Contributing
 

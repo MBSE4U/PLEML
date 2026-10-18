@@ -15,13 +15,14 @@ library package PLEML {
      * - FeatureTree: hierarchy of features that specifies the variability of a product line
      * - Feature: a characteristic of a product, with binding time and constraints
      * - FeatureConfiguration: a selection of features that describes a member product
-     * - RequiresConstraint, XORConstraint: constraints between features
+     * - RequiresConstraint, XORConstraint, ImpliesConstraint: constraints between features,
+     *   each parameterized with a FeatureOperand that holds two operands A and B
      * - LifeCycleKind: binding times of features
      * - Keywords: #featureModel, #featureTree, #feature, #featureConfiguration
      * - FeatureBinding (@FB), FeatureConfigurationBinding (@FCFGB): metadata to bind
      *   model elements of shared assets and product models to features and feature configurations
      *
-     * Version: v1.0
+     * Version: v1.1
      * License: MIT
      * Maintainer: Tim Weilkiens (Contact: tim@mbse4u.com), Marco Forlingieri, Vince Molnar
      *
@@ -144,30 +145,22 @@ library package PLEML {
         assert constraint featureConstraints : FeatureConstraint [*] {
             doc
             /* Set of all feature constraints owned by the feature. */
-            in occurrence constrainedFeatures;
-            in occurrence featureConfiguration;
-            in occurrence :>> owningFeature = that;
         }
         assert constraint requiresFeatures : RequiresConstraint [*] :> featureConstraints {
             doc
             /* Set of REQUIRES constraints */
-            in occurrence requiredFeatures :>> constrainedFeatures, requiredFeatures;
-            in occurrence featureConfiguration;
-            in occurrence owningFeature;
         }
         assert constraint xorFeatures : XORConstraint [*] :> featureConstraints {
             doc
             /* Set of XOR constraints (aka conflict constraints) */
-            in occurrence excluded :>> constrainedFeatures, excluded;
-            in occurrence featureConfiguration;
-            in occurrence owningFeature;
+        }
+        assert constraint impliesFeatures : ImpliesConstraint [*] :> featureConstraints {
+            doc
+            /* Set of IMPLIES constraints, e.g., (A and B) implies C */
         }
     }
     abstract occurrence features : Feature [0..*] {
         doc /* Base usage of all features. It is the base type of the keyword #feature. */
-    }
-    occurrence featureSet : Feature {
-        doc /* A generic feature that can be used as default value to express that a feature is selected without naming a specific one. */
     }
 
     enum def LifeCycleKind :> ScalarValues::Natural {
@@ -180,33 +173,59 @@ library package PLEML {
 
     abstract constraint def FeatureConstraint {
         doc
-        /* Common abstract definition of a feature constraint. */
-        in occurrence constrainedFeatures : Feature [0..*] {
-            doc /* The other features that are constrained by the owning feature. */
+        /* Common abstract definition of a feature constraint.
+         *
+         * All feature constraints have the same parameters: the constrained features as a FeatureOperand
+         * and the feature configuration to verify the constraint against. A specialization gives
+         * operand A and operand B their meaning, e.g., the owning and the required features of a REQUIRES constraint.
+         *
+         * Usage, e.g., in a feature that requires the feature d (that = the feature owning the constraint):
+         *   assert constraint :>> requiresFeatures {
+         *       in occurrence constrainedFeatures = new FeatureOperand(that, d);
+         *   }
+         *
+         * The feature configuration is set by the FeatureConfiguration for all feature constraints of its features.
+         */
+        in occurrence constrainedFeatures : FeatureOperand {
+            doc /* The features that are constrained, given as operands A and B. */
         }
         in occurrence featureConfiguration : FeatureConfiguration {
             doc /* The feature configuration to verify the constraint against. */
         }
-        in occurrence owningFeature : Feature {
-            doc /* The feature that owns the constraint. */
+    }
+
+    occurrence def FeatureOperand {
+        doc
+        /* The operands of a feature constraint: two sets of features A and B.
+         * Create it with new FeatureOperand(A, B), e.g., new FeatureOperand(that, d) or new FeatureOperand((e, f), g).
+         * The feature constraint definitions define the meaning of the operands.
+         */
+        occurrence operandA[0..*] : Feature {
+            doc /* Operand A: the left-hand side of the feature constraint. */
+        }
+        occurrence operandB[0..*] : Feature {
+            doc /* Operand B: the right-hand side of the feature constraint. */
         }
     }
 
     constraint def RequiresConstraint :> FeatureConstraint {
         doc
-        /* Definition of a REQUIRES constraint.
+        /* Definition of a REQUIRES constraint: A implies (B1 and B2 and ...).
+         *
+         * Operand A is the owning feature (typically that), operand B are the required features.
          *
          * Without a valid feature configuration,
          * no statement can be made and the constraint returns true.
-         * With a valid feature configuration, it checks if the owning feature (=that)
-         * is part of the feature configuration which implies that all requires features
+         * With a valid feature configuration, it checks if the owning feature
+         * is part of the feature configuration which implies that all required features
          * must also be part of the feature configuration.
          */
-        in occurrence requiredFeatures :>> constrainedFeatures {
+        ref occurrence owningFeature : Feature = constrainedFeatures.operandA {
+            doc /* The feature that requires the other features (operand A). */
+        }
+        ref occurrence requiredFeatures[1..*] : Feature = constrainedFeatures.operandB {
             doc /* The features that are required by the owning feature. */
         }
-        in occurrence featureConfiguration :>> featureConfiguration;
-        in occurrence owningFeature :>> owningFeature;
 
         if featureConfiguration != null
             ? featureConfiguration.suboccurrences->includes(owningFeature) implies
@@ -216,24 +235,62 @@ library package PLEML {
 
     constraint def XORConstraint :> FeatureConstraint {
         doc
-        /* Definition of a XOR constraint.
+        /* Definition of a XOR constraint: A implies not (B1 or B2 or ...).
+         *
+         * Operand A is the owning feature (typically that), operand B are the excluded features.
          *
          * Without a valid feature configuration, no statement can be made,
          * and the constraint returns true. With a valid feature configuration,
          * it checks if the owning feature is part of the feature configuration,
          * which implies that all excluded features shall not be part of the feature configuration.
          */
-        in occurrence excluded :>> constrainedFeatures {
+        ref occurrence owningFeature : Feature = constrainedFeatures.operandA {
+            doc /* The feature that excludes the other features (operand A). */
+        }
+        ref occurrence excluded[1..*] : Feature = constrainedFeatures.operandB {
             doc /* The features that are excluded by the owning feature. */
         }
-        in occurrence featureConfiguration :>> featureConfiguration;
-        in occurrence owningFeature :>> owningFeature;
 
         if featureConfiguration != null
             ? featureConfiguration.suboccurrences->includes(owningFeature) implies
                 excluded->ControlFunctions::forAll {
                     in f;
                     not featureConfiguration.suboccurrences->includes(f)
+                }
+            else true
+    }
+
+    constraint def ImpliesConstraint :> FeatureConstraint {
+        doc
+        /* Definition of an IMPLIES constraint: (premise1 and premise2 and ...) implies
+         * (conclusion1 and conclusion2 and ...), e.g., (A and B) implies C.
+         *
+         * Operand A are the premises, operand B are the conclusions,
+         * e.g., new FeatureOperand((e, f), g) for (e and f) implies g.
+         *
+         * It generalizes the REQUIRES constraint, which has the owning feature as its only premise.
+         * The owning feature is only the container of the constraint and is not implicitly a premise;
+         * list it in operand A if it shall be one.
+         *
+         * Without a valid feature configuration, no statement can be made and the constraint returns true.
+         * With a valid feature configuration, it checks that all conclusions are part of the
+         * feature configuration if all premises are part of it. Without premises, the conclusions always apply.
+         */
+        ref occurrence premises[0..*] : Feature = constrainedFeatures.operandA {
+            doc /* The features that must all be part of the feature configuration to trigger the constraint. */
+        }
+        ref occurrence conclusions[0..*] : Feature = constrainedFeatures.operandB {
+            doc /* The features that must all be part of the feature configuration if all premises are. */
+        }
+
+        if featureConfiguration != null
+            ?   premises->ControlFunctions::forAll {
+                    in f;
+                    featureConfiguration.suboccurrences->includes(f)
+                } implies
+                conclusions->ControlFunctions::forAll {
+                    in f;
+                    featureConfiguration.suboccurrences->includes(f)
                 }
             else true
     }
