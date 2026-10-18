@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="light dark">
+    <title>PLEML Editor</title>
+    <meta name="description" content="Web-based editor for PLEML feature models in SysML v2 textual notation, checked by the OpenSysML WebAssembly engine in your browser.">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' rx='3' fill='%232457c5'/%3E%3Cpath d='M4 12V4h5M4 8h4M11 4v8h2' stroke='%23fff' stroke-width='1.6' fill='none'/%3E%3C/svg%3E">
+    <link rel="stylesheet" href="css/editor.css">
+    <link rel="stylesheet" href="css/views.css">
+    <script type="module" src="src/main.js"></script>
+</head>
+<body>
+    <header class="toolbar">
+        <div class="brand"><span class="brand-mark" aria-hidden="true">PLE</span>PLEML Editor</div>
+        <nav class="menus" aria-label="Menu">
+            <details class="menu">
+                <summary>File</summary>
+                <div class="menu-items" role="menu">
+                    <button type="button" role="menuitem" data-action="new-feature-model">New feature model…</button>
+                    <button type="button" role="menuitem" data-action="new-package">New empty file…</button>
+                    <hr>
+                    <button type="button" role="menuitem" data-action="open">Open…<kbd>Ctrl+O</kbd></button>
+                    <hr>
+                    <button type="button" role="menuitem" data-action="save">Save<kbd>Ctrl+S</kbd></button>
+                    <button type="button" role="menuitem" data-action="save-as">Save as…<kbd>Ctrl+Shift+S</kbd></button>
+                    <button type="button" role="menuitem" data-action="save-all">Save all</button>
+                    <hr>
+                    <button type="button" role="menuitem" data-action="close">Close</button>
+                </div>
+            </details>
+            <details class="menu">
+                <summary>Insert</summary>
+                <div class="menu-items" role="menu" id="insert-menu"></div>
+            </details>
+            <details class="menu">
+                <summary>Examples</summary>
+                <div class="menu-items" role="menu" id="examples-menu"></div>
+            </details>
+        </nav>
+        <button type="button" class="check-button" data-action="check" title="Check the model now">Check</button>
+        <button type="button" id="engine-status" class="engine-status" data-action="engine">OpenSysML</button>
+    </header>
+
+    <div class="workbench">
+        <aside class="sidebar" aria-label="Model">
+            <section class="panel">
+                <h2>Documents</h2>
+                <ul id="documents" class="documents"></ul>
+            </section>
+            <section class="panel grow">
+                <h2>Feature models</h2>
+                <div id="feature-models"></div>
+            </section>
+        </aside>
+
+        <main class="editor-area">
+            <div class="view-bar">
+                <div class="view-tabs" role="tablist" aria-label="Editor">
+                    <button type="button" role="tab" data-view="diagram" aria-controls="view-diagram">Diagram</button>
+                    <button type="button" role="tab" data-view="form" aria-controls="view-form">Form</button>
+                    <button type="button" role="tab" data-view="text" aria-controls="view-text">Text</button>
+                </div>
+                <span class="view-spacer"></span>
+                <button type="button" id="undo" class="history-button" data-action="undo" disabled>↶ Undo</button>
+                <button type="button" id="redo" class="history-button" data-action="redo" disabled>↷ Redo</button>
+            </div>
+            <section id="view-diagram" class="view" role="tabpanel" aria-label="Diagram editor"><div id="diagram"></div></section>
+            <section id="view-form" class="view" role="tabpanel" aria-label="Form editor" hidden><div id="form"></div></section>
+            <section id="view-text" class="view text-view" role="tabpanel" aria-label="Text editor" hidden>
+                <div id="tabs" class="tabs" role="tablist" aria-label="Open documents"></div>
+                <div id="code"></div>
+            </section>
+        </main>
+
+        <section class="problems-panel" aria-labelledby="problems-title">
+            <h2 id="problems-title">Problems <span id="problem-count" class="count-ok"></span></h2>
+            <div id="problems"></div>
+        </section>
+    </div>
+
+    <footer class="statusbar">
+        <span id="message" role="status" aria-live="polite"></span>
+        <span id="check-status"></span>
+        <span id="cursor"></span>
+    </footer>
+</body>
+</html>

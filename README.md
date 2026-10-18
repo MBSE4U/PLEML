@@ -51,6 +51,14 @@ package MyProductLine {
 
 The [Drone product line example](Examples) shows the complete approach.
 
+## PLEML Editor
+
+[editor/](editor) contains a web-based editor for PLEML feature models. It creates, reads and writes `.sysml` files and checks them with the OpenSysML WebAssembly engine in the browser. Besides the text editor, it offers:
+- a graphical feature diagram that shows features, alternatives, constraints and configurations in an intuitive, non-SysML notation, with constraint violations highlighted
+- a form-based editor with a configuration matrix
+
+See [editor/README.md](editor/README.md).
+
 ## Repository Structure
 
 ```
@@ -59,6 +67,8 @@ Examples/                                                      # Drone Product L
   MBPLE-Example-DroneProductLine-PLEML-SysMLv2-FeatureModel.sysml    # Feature tree and feature configurations
   MBPLE-Example-DroneProductLine-PLEML-SysMLv2-SharedAssets.sysml    # Shared assets linked to features
   MBPLE-Example-DroneProductLine-PLEML-SysMLv2-ProductModel.sysml    # Product model of a member product
+Test/                                                          # Test configurations for the feature constraints
+editor/                                                        # Web-based PLEML editor (static web app)
 ```
 
 ## Tests
