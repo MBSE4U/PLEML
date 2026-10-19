@@ -1,5 +1,13 @@
 # Change Log
 
+## v1.1.1
+
+Same content as v1.1.0, republished with LF line endings.
+
+- Fixed the line endings of the package: the v1.1.0 package on the Sysand index contained `PLEML.sysml`, `README.md` and `CHANGELOG.md` with Windows (CRLF) line endings, so its checksums differed from the git tag. The library itself is unchanged.
+- Added `.gitattributes` to keep LF line endings on every platform, also in Windows working trees, and normalized the example models to LF.
+- The release workflow now checks that the files in the built `.kpar` package are byte-identical to the committed files.
+
 ## v1.1.0
 
 - Breaking: all feature constraints now have the same parameters: `constrainedFeatures` of the new type `FeatureOperand` with the operands `operandA` and `operandB`, and `featureConfiguration`. The specific features (`owningFeature`, `requiredFeatures`, `excluded`, `premises`, `conclusions`) are derived from the operands. Set the operands with `in occurrence constrainedFeatures = new FeatureOperand(that, d);` instead of redefining `requiredFeatures` or `excluded`. `FeatureConstraint` no longer has the parameter `owningFeature`.
