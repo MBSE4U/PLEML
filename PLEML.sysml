@@ -22,7 +22,7 @@ library package PLEML {
      * - FeatureBinding (@FB), FeatureConfigurationBinding (@FCFGB): metadata to bind
      *   model elements of shared assets and product models to features and feature configurations
      *
-     * Version: v1.1
+     * Version: v1.1.1
      * License: MIT
      * Maintainer: Tim Weilkiens (Contact: tim@mbse4u.com), Marco Forlingieri, Vince Molnar
      *

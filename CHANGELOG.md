@@ -4,7 +4,7 @@
 
 Same content as v1.1.0, republished with LF line endings.
 
-- Fixed the line endings of the package: the v1.1.0 package on the Sysand index contained `PLEML.sysml`, `README.md` and `CHANGELOG.md` with Windows (CRLF) line endings, so its checksums differed from the git tag. The library itself is unchanged.
+- Fixed the line endings of the package: the v1.1.0 package on the Sysand index contained `PLEML.sysml`, `README.md` and `CHANGELOG.md` with Windows (CRLF) line endings, so its checksums differed from the git tag. The library itself is unchanged except for its version number.
 - Added `.gitattributes` to keep LF line endings on every platform, also in Windows working trees, and normalized the example models to LF.
 - The release workflow now checks that the files in the built `.kpar` package are byte-identical to the committed files.
 
