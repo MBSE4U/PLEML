@@ -1,0 +1,3 @@
+# LF line endings on every platform, also in Windows working trees (core.autocrlf).
+# A package built with "sysand build" contains the working-tree files, so they must match the tags byte for byte.
+* text=auto eol=lf

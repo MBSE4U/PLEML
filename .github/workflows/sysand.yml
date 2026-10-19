@@ -31,6 +31,22 @@ jobs:
         run: |
           sysand build
           cp output/*.kpar output/pleml.kpar
+
+      - name: Check that the package matches the tag
+        run: |
+          # The packaged files must be byte-identical to the committed files (e.g. no CRLF line endings).
+          # .project.json and .meta.json are written by sysand build and are not compared.
+          mkdir -p output/check
+          unzip -q -o output/pleml.kpar -d output/check
+          status=0
+          for file in $(cd output/check && find . -type f ! -path './.meta.json' ! -path './.project.json' | sed 's|^\./||'); do
+            if ! git cat-file blob "HEAD:$file" 2>/dev/null | cmp -s - "output/check/$file"; then
+              echo "::error::$file in the package differs from the committed file"
+              status=1
+            fi
+          done
+          rm -rf output/check
+          exit $status
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
