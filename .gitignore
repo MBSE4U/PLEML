@@ -3,3 +3,4 @@ sysand-lock.toml
 .claude/
 output/
 *.kpar
+sysand-token.txt
