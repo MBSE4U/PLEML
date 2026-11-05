@@ -4,3 +4,4 @@ sysand-lock.toml
 output/
 *.kpar
 editor/vendor/
+sysand-token.txt
